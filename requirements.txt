@@ -1,1 +1,2 @@
-sympy==1.6
+#This is the requirements file
+sympy>=1.5
