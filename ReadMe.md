@@ -2,7 +2,7 @@ __Delta Symbol SymPy Expressions__
 
 author: Jonathan Gutow <gutow@uwosh.edu>
 
-date: June 2020
+date: August 2020
 
 license: GPL V3+
 

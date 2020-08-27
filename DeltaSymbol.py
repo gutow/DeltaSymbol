@@ -13,8 +13,8 @@ import inspect
 class DeltaSymbol(Symbol):
     """
     This class extends SymPy symbols to include Delta of a symbol ``X`` which
-    is displayed as $\Delta{X}$ in Jupyter notebooks and ``DeltaX`` in plain
-    text.
+    is displayed as $\Delta{X}$ in Jupyter notebooks and the user chosen in
+    python compatible character sequence in plain text.
 
     Explanation
     ===========
