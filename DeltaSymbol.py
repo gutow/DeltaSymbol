@@ -118,7 +118,7 @@ class DeltaSymbol(Symbol):
 def mkdelta(textname, deltaof, **assumptions):
     tmpcls = DeltaSymbol(textname, deltaof, **assumptions)
     ipyglobals = tmpcls._get_ipython_globals()
-    ipyglobals[textname]=DeltaSymbol(textname, deltaof, **assumptions)
+    ipyglobals[textname] = DeltaSymbol(textname, deltaof, **assumptions)
     return ipyglobals[textname]
 
 DeltaSym = DeltaSymbol
