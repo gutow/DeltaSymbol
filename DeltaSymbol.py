@@ -51,9 +51,9 @@ class DeltaSymbol(Symbol):
 
     """
     def __new__(cls, textname, deltaof, **assumptions):
-        cls.name = textname
-        cls.basestr = deltaof
-        return super().__new__(cls, textname, **assumptions)
+        obj = super().__new__(cls, textname, **assumptions)
+        obj.basestr = deltaof
+        return obj
 
     def _repr_latex_(cls):
         return r'$\Delta{' + str(cls.basestr) + '}$'
@@ -116,9 +116,9 @@ class DeltaSymbol(Symbol):
         return (ipyglobals[finalstr]-ipyglobals[initstr])
 
 def mkdelta(textname, deltaof, **assumptions):
-    tmpcls = DeltaSymbol(textname, deltaof, **assumptions)
-    ipyglobals = tmpcls._get_ipython_globals()
-    ipyglobals[textname] = DeltaSymbol(textname, deltaof, **assumptions)
+    tempobj = DeltaSymbol(textname, deltaof, **assumptions)
+    ipyglobals = tempobj._get_ipython_globals()
+    ipyglobals[textname] = tempobj
     return ipyglobals[textname]
 
 DeltaSym = DeltaSymbol
