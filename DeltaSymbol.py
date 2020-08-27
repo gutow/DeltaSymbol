@@ -25,21 +25,24 @@ class DeltaSymbol(Symbol):
 
     After importing the package (``from DeltaSymbol import *``) for an
     interactive session it is recommened that you import SymPy as well:
-    ``from sympy import *``. A DeltaSymbol can be created with the call
-    ``DeltaSymbol(name)``, ``DeltaSym(name)`` or ``DSym(name)``.
+    ``from sympy import *``. A DeltaSymbol is best created for interactive
+    sessions with the ``mkdelta(textname,deltaof)`` call. See the code for
+    lower level calls you might make in code.
 
     Parameters
     ==========
-    name: string for the symbol (e.g. X, G, T...)
+    textname: string for the name of the object, used when calling it in
+    python or Sympy expressions (e.g. DX, DG, DeltaT...)
+    deltaof: string for the symbol this is delta of (e.g. X, G, T ...)
     **assumptions: any valid assumptions for a symbol. See
     ``sympy.core.symbol``.
 
     Examples
     ========
     >>> from DeltaSymbol import *
-    >>> DG = DSym('G')
-    >>> DG
-    DeltaG
+    >>> mkdelta('DG','G')
+    >>> DG #In Jupyter this will show the latex typeset version of `\Delta G`
+    DG
     >>> DG.explicit()
     G_f - G_i
     >>> from sympy import *
@@ -47,22 +50,23 @@ class DeltaSymbol(Symbol):
     0.500000000000000
 
     """
-    def __new__(cls, name, **assumptions):
-        cls.name = name
-        return super().__new__(cls, name, **assumptions)
+    def __new__(cls, textname, deltaof, **assumptions):
+        cls.name = textname
+        cls.basestr = deltaof
+        return super().__new__(cls, textname, **assumptions)
 
     def _repr_latex_(cls):
-        return r'$\Delta{' + str(cls.name) + '}$'
+        return r'$\Delta{' + str(cls.basestr) + '}$'
 
     def _latex(cls, *obj, **kwargs):
         # mode = kwargs.pop('mode',None)
         # if mode is None:
         #     return latex(cls._repr_latex_(),mode='inline',**kwargs)
         # else:
-        return r'\Delta{' + str(cls.name) + '}'
+        return r'\Delta{' + str(cls.basestr) + '}'
 
     def __str__(cls):
-        return 'Delta' + str(cls.name)
+        return cls.name
 
     def __repr__(cls):
         return cls.__str__()
@@ -103,13 +107,19 @@ class DeltaSymbol(Symbol):
         return (global_dict)
 
     def explicit(cls):
-        initstr = cls.name + '_i'
-        finalstr = cls.name + '_f'
+        initstr = cls.basestr + '_i'
+        finalstr = cls.basestr + '_f'
         ipyglobals = cls._get_ipython_globals()
         # inject symbols in to ipython global namespace
         ipyglobals[finalstr]= Symbol(finalstr)
         ipyglobals[initstr] = Symbol(initstr)
         return (ipyglobals[finalstr]-ipyglobals[initstr])
+
+def mkdelta(textname, deltaof, **assumptions):
+    tmpcls = DeltaSymbol(textname, deltaof, **assumptions)
+    ipyglobals = tmpcls._get_ipython_globals()
+    ipyglobals[textname]=tmpcls
+    return ipyglobals[textname]
 
 DeltaSym = DeltaSymbol
 DSym = DeltaSymbol
