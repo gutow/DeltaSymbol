@@ -16,4 +16,4 @@ the command: `from DeltaSymbol import *`. This does not import SymPy, which must
 
 Usage examples can be found in the docstrings and the demonstration Jupyter notebook `Demonstration DeltaSymbol Class.ipynb`. 
 
-Try in binder: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/gutow/DeltaSymbol.git/origin)
+Try in binder: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/gutow/DeltaSymbol.git/master)
