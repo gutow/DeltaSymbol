@@ -1,75 +1,57 @@
-# Extend the symbol class to generate a special symbol which is Delta of `X`
-# where `X` is some symbol. Can be expanded into `Xf - Xi` (final - initial)
-# to complete later calculations. Mostly for pretty math common to physical
-# sciences (esp. thermodynamics).
-# Jonathan Gutow <gutow@uwosh.edu>
-# June 2020
-# License: GPL V3+
-
-from sympy import Symbol
+from sympy.core.symbol import Symbol
 import inspect
 
 
 class DeltaSymbol(Symbol):
     """
     This class extends SymPy symbols to include Delta of a symbol ``X`` which
-    is displayed as $\Delta{X}$ in Jupyter notebooks and the user chosen in
+    is displayed as typeset latex in Jupyter notebooks and a user chosen
     python compatible character sequence in plain text.
 
     Explanation
     ===========
     Beyond the pretty output there is only one other special thing about
-    this symbol. ``X.explicit()`` will return the symbolic expression ``X_f -
+    this symbol. ``X.explicit`` will return the symbolic expression ``X_f -
     X_i`` and add ``X_f`` and ``X_i`` to the recognized symbols in an
     interactive SymPy session.
 
     After importing the package (``from DeltaSymbol import *``) for an
     interactive session it is recommened that you import SymPy as well:
     ``from sympy import *``. A DeltaSymbol is best created for interactive
-    sessions with the ``mkdelta(textname,deltaof)`` call. See the code for
-    lower level calls you might make in code.
+    sessions with a statement like: ``DX = mkdelta('X')`` call.
+    ``DeltaSymbol()``, ``DeltaSym()`` and ``DSym()``are all synonyms for
+    ``mkdelta()``.
 
     Parameters
     ==========
-    textname: string for the name of the object, used when calling it in
-    python or Sympy expressions (e.g. DX, DG, DeltaT...)
-    deltaof: string for the symbol this is delta of (e.g. X, G, T ...)
+    deltaof: string for the symbol this is delta of (e.g. 'X', 'G', 'T' ...)
+    or an existing sympy Symbol (e.g. X or T).
     **assumptions: any valid assumptions for a symbol. See
     ``sympy.core.symbol``.
 
     Examples
     ========
-    >>> from DeltaSymbol import *
-    >>> mkdelta('DG','G')
-    >>> DG #In Jupyter this will show the latex typeset version of `\Delta G`
-    DG
-    >>> DG.explicit()
+    >>> from DeltaSymbol import mkdelta
+    >>> DG = mkdelta('G')
+    >>> DG # In Jupyter this will show the latex typeset version of `\Delta G`
+    \Delta G
+    >>> # Below only works in IPython/Jupyter
+    >>> DG.explicit # doctest: +SKIP
     G_f - G_i
-    >>> from sympy import *
-    >>> DG.explicit().subs({G_f:2.0,G_i:1.5})
+    >>> DG.explicit().subs({G_f:2.0,G_i:1.5}) # doctest: +SKIP
     0.500000000000000
+    >>> T = Symbol('T')
+    >>> DT = mkdelta(T)
+    >>> DT
+    \Delta T
 
     """
-    def __new__(cls, textname, deltaof, **assumptions):
-        obj = super().__new__(cls, textname, **assumptions)
-        obj.basestr = deltaof
-        return obj
 
-    def _repr_latex_(cls):
-        return r'$\Delta{' + str(cls.basestr) + '}$'
-
-    def _latex(cls, *obj, **kwargs):
-        # mode = kwargs.pop('mode',None)
-        # if mode is None:
-        #     return latex(cls._repr_latex_(),mode='inline',**kwargs)
-        # else:
-        return r'\Delta{' + str(cls.basestr) + '}'
-
-    def __str__(cls):
-        return cls.name
-
-    def __repr__(cls):
-        return cls.__str__()
+    def __new__(cls, deltaof, **assumptions):
+        # obj = super().__new__(cls, textname, **assumptions)
+        cls.basestr = str(deltaof)
+        cls.latexstr = r'\Delta ' + cls.basestr
+        return super().__new__(cls, cls.latexstr, **assumptions)
 
     def _get_ipython_globals(cls):
         is_not_ipython_global = True
@@ -106,20 +88,17 @@ class DeltaSymbol(Symbol):
                 'Unable to find `__main__` of interactive session. Are you running in Jupyter or IPython?')
         return (global_dict)
 
+    @property
     def explicit(cls):
-        initstr = cls.basestr + '_i'
-        finalstr = cls.basestr + '_f'
-        ipyglobals = cls._get_ipython_globals()
-        # inject symbols in to ipython global namespace
-        ipyglobals[finalstr]= Symbol(finalstr)
-        ipyglobals[initstr] = Symbol(initstr)
-        return (ipyglobals[finalstr]-ipyglobals[initstr])
+        from sympy.core.sympify import sympify
+        stri = cls.basestr + '_i'
+        strf = cls.basestr + '_f'
+        ipg = cls._get_ipython_globals()
+        ipg[stri] = Symbol(stri)
+        ipg[strf] = Symbol(strf)
+        return sympify(strf + '-' + stri)
 
-def mkdelta(textname, deltaof, **assumptions):
-    tempobj = DeltaSymbol(textname, deltaof, **assumptions)
-    ipyglobals = tempobj._get_ipython_globals()
-    ipyglobals[textname] = tempobj
-    return ipyglobals[textname]
 
-DeltaSym = DeltaSymbol
+mkdelta = DeltaSymbol
 DSym = DeltaSymbol
+DeltaSym = DeltaSymbol
