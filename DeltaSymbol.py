@@ -1,6 +1,4 @@
 from sympy.core.symbol import Symbol
-import inspect
-
 
 class DeltaSymbol(Symbol):
     """
@@ -22,10 +20,8 @@ class DeltaSymbol(Symbol):
     ``DeltaSymbol()``, ``DeltaSym()`` and ``DSym()``are all synonyms for
     ``mkdelta()``.
 
-    Parameters
-    ==========
-    deltaof: string for the symbol this is delta of (e.g. 'X', 'G', 'T' ...)
-    or an existing sympy Symbol (e.g. X or T).
+    :param string deltaof: for the symbol this is delta of (e.g. 'X',
+    'G', 'T' ...) or an existing sympy Symbol (e.g. X or T).
     **assumptions: any valid assumptions for a symbol. See
     ``sympy.core.symbol``.
 
@@ -53,47 +49,13 @@ class DeltaSymbol(Symbol):
         cls.latexstr = r'\Delta ' + cls.basestr
         return super().__new__(cls, cls.latexstr, **assumptions)
 
-    def _get_ipython_globals(cls):
-        is_not_ipython_global = True
-        frame = inspect.currentframe()
-        global_dict = frame.f_globals
-        try:
-            namestr = global_dict['__name__']
-            docstr = global_dict['__doc__']
-            # print(global_dict['__name__'])
-            # print(docstr)
-        except KeyError:
-            namestr = ''
-        if (namestr == '__main__') and (
-                docstr == 'Automatically created module for IPython interactive environment'):
-            is_not_ipython_global = False
-        depth = 0
-        try:
-            while (is_not_ipython_global):
-                nextframe = frame.f_back
-                frame = nextframe
-                depth += 1
-                try:
-                    global_dict = frame.f_globals
-                    namestr = global_dict['__name__']
-                    docstr = global_dict['__doc__']
-                    # print(global_dict['__name__'])
-                except KeyError:
-                    namestr = ''
-                if (namestr == '__main__') and (
-                        docstr == 'Automatically created module for IPython interactive environment'):
-                    is_not_ipython_global = False
-        except AttributeError:
-            raise AttributeError(
-                'Unable to find `__main__` of interactive session. Are you running in Jupyter or IPython?')
-        return (global_dict)
-
     @property
     def explicit(cls):
         from sympy.core.sympify import sympify
+        from IPython import get_ipython
         stri = cls.basestr + '_i'
         strf = cls.basestr + '_f'
-        ipg = cls._get_ipython_globals()
+        ipg = get_ipython().user_ns
         ipg[stri] = Symbol(stri)
         ipg[strf] = Symbol(strf)
         return sympify(strf + '-' + stri)
